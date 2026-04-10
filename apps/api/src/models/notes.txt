@@ -1,0 +1,9 @@
+{
+"self_name":"shyam",
+"password_hash":"R@dhav28004",
+"business_name":"Raghav llp",
+"user_email":"rahul@raghav.com",
+"logo_url":"https://example.com/logo.png",
+"currency":"USD",
+"payment_method":"credit_card"
+}

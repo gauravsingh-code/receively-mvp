@@ -19,7 +19,7 @@ export const config = {
   // JWT
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET || 'your-secret-key',
-    refreshSecret: process.env.JWT_REFRESH_SECRET || 'your-refresh-secret',
+    refreshSecret: process.env.JWT_REFRESH_SECRET || 'your-~-secret',
     accessExpiry: '15m',
     refreshExpiry: '7d',
   },
