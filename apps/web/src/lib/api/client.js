@@ -1,6 +1,6 @@
-/**
- * API Client - Fetch wrapper for backend communication
- */
+// /**
+//  * API Client - Fetch wrapper for backend communication
+//  */
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 

@@ -56,7 +56,10 @@ export const validatePassword = (password) => {
 
 export const checkEmailExist =async (email) => {
     const data = await supabase.from('users_data').select('user_email').eq('user_email' , email).single();
-    if(data.length > 0){
+    console.log('-----------');
+    console.log('Email data: ',data);
+    console.log('-----------');
+    if(!data.success){
         return false;
     }
     return true;
