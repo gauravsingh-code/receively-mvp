@@ -9,40 +9,50 @@ class ApiClient {
     this.baseURL = baseURL;
   }
 
-  async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
-    const config = {
-      headers: {
+  //getToken from localStorage
+  getToken(){
+    if(typeof window !== 'undefined'){
+        return localStorage.getItem('token');
+    }
+  };
+  
+  async request(endpoint , options = {}){
+      const url = `${this.baseURL}${endpoint}`;
+      const token = this.getToken();
+
+     const config = {
+      headers : {
         'Content-Type': 'application/json',
+        ...(token ? {Authorization : `Bearer ${token}`} : {}),
         ...options.headers,
       },
       ...options,
-    };
+     };
 
-    try {
-      const response = await fetch(url, config);
-      const data = await response.json();
+     try{
+        const response = await fetch(url , config);
+        const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || 'API request failed');
-      }
+        if(!response.ok){
+          //if token expired, clear it and redirect to login
+          if(response.status === 401){
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+          } 
+          throw new Error(data.message || 'API request failed');
+        }
 
-      return data;
-    } catch (error) {
-      console.error('API Error:', error);
+        return data;
+     }catch(error){
+      console.error('Api error: ', error);
       throw error;
-    }
+     }
   }
 
-  // GET request
-  async get(endpoint, options = {}) {
-    return this.request(endpoint, {
-      method: 'GET',
-      ...options,
-    });
+  async get(endpoint , options = {}){
+    return this.request(endpoint , {method : 'GET', ...options});
   }
 
-  // POST request
   async post(endpoint, data, options = {}) {
     return this.request(endpoint, {
       method: 'POST',
@@ -51,7 +61,6 @@ class ApiClient {
     });
   }
 
-  // PUT request
   async put(endpoint, data, options = {}) {
     return this.request(endpoint, {
       method: 'PUT',
@@ -60,15 +69,10 @@ class ApiClient {
     });
   }
 
-  // DELETE request
   async delete(endpoint, options = {}) {
-    return this.request(endpoint, {
-      method: 'DELETE',
-      ...options,
-    });
+    return this.request(endpoint, { method: 'DELETE', ...options });
   }
 
-  // Check API health
   async health() {
     return this.get('/health');
   }
