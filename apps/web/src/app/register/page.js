@@ -6,8 +6,7 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import api from '@/lib/api/client.js';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -31,20 +30,9 @@ export default function RegisterPage() {
         setLoading(true);
 
         try {
-            // Raw fetch — no ApiClient
-            // const response = await fetch(`${API_URL}/api/auth/register`, {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(form),
-            // });
-
-            const response = await fetch(`${API_URL}/api/auth/register`,{
-                method : 'POST',
-                headers : {'Content-Type': 'application/json'},
-                body : JSON.stringify(form)
+            const response = api.post('/api/auth/register', {
+                body : {form},
             });
-            console.log('Response status:', response); 
-            const data = await response.json();
 
             if (!response.ok) {
                 setError(data.message || 'Registration failed');

@@ -6,8 +6,7 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import api from '@/lib/api/client.js';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -25,31 +24,20 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            // Raw fetch — no ApiClient
-            const response = await fetch(`${API_URL}/api/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: form.email,
-                    password: form.password,
-                }),
+            const data = await api.post('/api/auth/login', {
+                email: form.email,
+                password: form.password
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                setError(data.message || 'Login failed');
-                return;
-            }
-
-            // Save token to localStorage
+            // Save tokens to localStorage
             localStorage.setItem('token', data.accessToken);
+            localStorage.setItem('refreshToken', data.refreshToken);
 
             // Redirect to dashboard
             router.push('/dashboard');
 
         } catch (err) {
-            setError('Something went wrong. Please try again.');
+            setError(err.message || 'Something went wrong. Please try again.');
         } finally {
             setLoading(false);
         }
