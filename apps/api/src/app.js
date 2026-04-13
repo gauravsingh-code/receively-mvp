@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes.js'
+import clientsRoutes from './routes/clients.routes.js'
 
 export function createApp(){
     const app = express();
@@ -9,6 +10,7 @@ export function createApp(){
 
     //Routes
     app.use('/api/auth' , authRoutes);
+    app.use('/api/clients' , clientsRoutes);
 
     //Health Check
     app.get('/health' , (req, res) => {

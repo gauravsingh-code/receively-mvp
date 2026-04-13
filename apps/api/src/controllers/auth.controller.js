@@ -84,6 +84,10 @@ export const register = asyncHandler(async (req, res) => {
 export const login = asyncHandler(async (req, res) => {
   const { password, email } = req.body;
 
+  // console.log("Full request : ", req);
+  // console.log("Reust body: ", req.body);
+  // console.log("req headers: ", req.headers);
+
   if (!email || !password) {
     throw new ValidationError("Email and password are required");
   }
@@ -119,6 +123,7 @@ export const login = asyncHandler(async (req, res) => {
 
     if(tokenError){
         throw new Error('Failed to store refresh token');
+        
     }
   res.json({
     success: true,
