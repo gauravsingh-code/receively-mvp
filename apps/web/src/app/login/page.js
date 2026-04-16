@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
@@ -13,6 +13,25 @@ export default function LoginPage() {
     const [form, setForm] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [checkingAuth, setCheckingAuth] = useState(true);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if(token){
+            // Use push instead of replace so back button works properly
+            router.push('/dashboard');
+        }else{
+            setCheckingAuth(false);
+        }
+    }, [router]);
+
+    if(checkingAuth){
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <p className='text-gray-500 text-sm'>Checking Authentication...</p>
+            </div>
+        )
+    }
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });

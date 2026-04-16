@@ -71,3 +71,98 @@ CREATE TABLE invoices (
 CREATE INDEX idx_invoices_user_id ON invoices(user_id);
 CREATE INDEX idx_invoices_client_id ON invoices(client_id);
 CREATE INDEX idx_invoices_status ON invoices(status);
+
+
+
+
+
+
+
+---------------Implementing multi-tenancy with the "users_data" table----------------
+----------JUst for reference, not to be included in the final code----------
+
+
+-- Table: modules (available features in the app)
+CREATE TABLE modules (
+  module_id uuid primary key default gen_random_uuid(),
+  module_key varchar(50) unique not null, -- 'dashboard', 'invoices', etc.
+  name varchar(100) not null,
+  icon varchar(10),
+  route_path varchar(255) not null,
+  description text,
+  display_order int default 0,
+  is_active boolean default true,
+  created_at timestamp default current_timestamp
+);
+
+-- Table: subscription_tiers (free, premium, enterprise)
+CREATE TABLE subscription_tiers (
+  tier_id uuid primary key default gen_random_uuid(),
+  tier_key varchar(50) unique not null, -- 'free', 'premium', 'enterprise'
+  name varchar(100) not null,
+  price decimal(10, 2) default 0,
+  created_at timestamp default current_timestamp
+);
+
+-- Table: tier_modules (which modules are available in each tier)
+CREATE TABLE tier_modules (
+  tier_id uuid references subscription_tiers(tier_id) on delete cascade,
+  module_id uuid references modules(module_id) on delete cascade,
+  is_enabled boolean default true,
+  primary key (tier_id, module_id)
+);
+
+-- Add subscription_tier to users_data
+ALTER TABLE users_data 
+ADD COLUMN subscription_tier varchar(50) default 'free',
+ADD COLUMN subscription_expires_at timestamp;
+
+-- Optional: User-specific module overrides (for special cases)
+CREATE TABLE user_module_overrides (
+  user_id uuid references users_data(id) on delete cascade,
+  module_id uuid references modules(module_id) on delete cascade,
+  is_enabled boolean not null,
+  primary key (user_id, module_id)
+);
+
+-- Seed default modules
+INSERT INTO modules (module_key, name, icon, route_path, display_order) VALUES
+('dashboard', 'Dashboard', '📊', '/dashboard', 1),
+('invoices', 'Invoices', '📝', '/dashboard/invoices', 2),
+('clients', 'Clients', '👥', '/dashboard/clients', 3),
+('payments', 'Payments', '💳', '/dashboard/payments', 4),
+('analytics', 'Analytics', '📈', '/dashboard/analytics', 5),
+('settings', 'Settings', '⚙️', '/dashboard/settings', 99);
+
+-- Seed subscription tiers
+INSERT INTO subscription_tiers (tier_key, name, price) VALUES
+('free', 'Free Plan', 0),
+('premium', 'Premium Plan', 29.99),
+('enterprise', 'Enterprise Plan', 99.99);
+
+-- Assign modules to tiers
+-- Free tier
+INSERT INTO tier_modules (tier_id, module_id, is_enabled)
+SELECT t.tier_id, m.module_id, true
+FROM subscription_tiers t
+CROSS JOIN modules m
+WHERE t.tier_key = 'free' 
+AND m.module_key IN ('dashboard', 'invoices', 'clients', 'settings');
+
+-- Premium tier (all of free + analytics, payments)
+INSERT INTO tier_modules (tier_id, module_id, is_enabled)
+SELECT t.tier_id, m.module_id, true
+FROM subscription_tiers t
+CROSS JOIN modules m
+WHERE t.tier_key = 'premium';
+
+-- Enterprise tier (all modules)
+INSERT INTO tier_modules (tier_id, module_id, is_enabled)
+SELECT t.tier_id, m.module_id, true
+FROM subscription_tiers t
+CROSS JOIN modules m
+WHERE t.tier_key = 'enterprise';
+
+------------------------------
+
+

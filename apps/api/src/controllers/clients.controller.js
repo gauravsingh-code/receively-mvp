@@ -7,6 +7,7 @@ import { ValidationError, NotFoundError } from "../utils/errors.js";
  */
 export const getClients = asyncHandler(async (req, res) => {
   const userId = req.user.user_id;
+  console.log('Use id from api: ', userId);
   const { includeArchived = false } = req.query;
 
   let query = supabase

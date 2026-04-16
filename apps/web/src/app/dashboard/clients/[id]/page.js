@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Card, { CardHeader, CardContent } from '@/components/ui/Card';
@@ -14,21 +14,23 @@ import api from '@/lib/api/client';
 
 export default function ClientDetailPage({ params }) {
   const router = useRouter();
+  const unwrappedParams = use(params);
+  const clientId = unwrappedParams.id;
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (params.id) {
+    if (clientId) {
       fetchClientDetails();
     }
-  }, [params.id]);
+  }, [clientId]);
 
   const fetchClientDetails = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get(`/api/clients/${params.id}`);
+      const response = await api.get(`/api/clients/${clientId}`);
       setClient(response.data);
     } catch (err) {
       setError(err.message || 'Failed to fetch client details');

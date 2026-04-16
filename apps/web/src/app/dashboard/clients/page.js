@@ -12,11 +12,9 @@ import Card, { CardHeader, CardContent } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import ClientForm from '@/components/ClientForm';
 import api from '@/lib/api/client';
-import { useAuth } from '@/lib/hooks/useAuth';
 
 export default function ClientsPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,29 +22,10 @@ export default function ClientsPage() {
   const [editingClient, setEditingClient] = useState(null);
   const [showArchived, setShowArchived] = useState(false);
 
-  // Don't fetch if still checking auth
+  // Fetch clients on mount and when showArchived changes
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      fetchClients();
-    }
-  }, [showArchived, authLoading, isAuthenticated]);
-
-  // Show loading while checking authentication
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-gray-600">Checking authentication...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Don't render content if not authenticated
-  if (!isAuthenticated) {
-    return null;
-  }
+    fetchClients();
+  }, [showArchived]);
 
   const fetchClients = async () => {
     try {

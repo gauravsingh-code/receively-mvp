@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api/client';
 import Button from '@/components/ui/Button';
+import {filterNavigation} from '@/config/navigation.js';
 
 // Context to share user data with child pages
 const DashboardContext = createContext(null);
@@ -25,17 +26,30 @@ export default function DashboardLayout({ children }) {
       return;
     }
 
+    // Add timeout to prevent infinite loading if API hangs
+    const timeout = setTimeout(() => {
+      console.error('API call timeout - redirecting to login');
+      setLoading(false);
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      window.location.href = '/login';
+    }, 10000); // 10 seconds max
+
     api.get('/api/auth/profile')
       .then((res) => {
+        clearTimeout(timeout);
         setUser(res?.data);
         setLoading(false);
       })
       .catch(() => {
+        clearTimeout(timeout);
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         setLoading(false);
         window.location.href = '/login';
       });
+
+    return () => clearTimeout(timeout); // Cleanup on unmount
   }, []);
 
   const handleLogout = async () => {
@@ -56,14 +70,15 @@ export default function DashboardLayout({ children }) {
     );
   }
 
-  const navItems = [
-    { href: '/dashboard', icon: '📊', label: 'Dashboard' },
-    { href: '/dashboard/invoices', icon: '📝', label: 'Invoices' },
-    { href: '/dashboard/clients', icon: '👥', label: 'Clients' },
-    { href: '/dashboard/payments', icon: '💳', label: 'Payments' },
-    { href: '/dashboard/settings', icon: '⚙️', label: 'Settings' },
-  ];
+  // const navItems = [
+  //   { href: '/dashboard', icon: '📊', label: 'Dashboard' },
+  //   { href: '/dashboard/invoices', icon: '📝', label: 'Invoices' },
+  //   { href: '/dashboard/clients', icon: '👥', label: 'Clients' },
+  //   { href: '/dashboard/payments', icon: '💳', label: 'Payments' },
+  //   { href: '/dashboard/settings', icon: '⚙️', label: 'Settings' },
+  // ];
 
+    const navItems = filterNavigation(user);
   return (
     <DashboardContext.Provider value={{ user, setUser }}>
       <div className="min-h-screen flex bg-gray-50">
