@@ -4,6 +4,8 @@ import authRoutes from './routes/auth.routes.js'
 import clientsRoutes from './routes/clients.routes.js'
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger.js';
+import invoiceRoutes from './routes/invoices.routes.js';
+import invoiceSubRoutes from './routes/invoice-sub.routes.js';
 
 export function createApp(){
     const app = express();
@@ -26,6 +28,8 @@ export function createApp(){
     //Routes
     app.use('/api/auth' , authRoutes);
     app.use('/api/clients' , clientsRoutes);
+    app.use('/api/invoices' , invoiceRoutes);
+    app.use('/api/invoices/:invoiceId' , invoiceSubRoutes);
 
     //Health Check
     app.get('/health' , (req, res) => {
