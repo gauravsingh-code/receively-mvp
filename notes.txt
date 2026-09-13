@@ -1,0 +1,7 @@
+1. Monolithic
+2. Mono Repo / Turbo pack
+3. Micro Service
+4. Event Driven/Server less architecture 
+
+Unified Monolithic
+Client - Server Monolithic 
